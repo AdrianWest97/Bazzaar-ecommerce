@@ -1,0 +1,16 @@
+.cart-table {
+  text-align: center;
+}
+.cart-table td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 20px;
+  color: #000000;
+}
+.cart-table td img {
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/*# sourceMappingURL=cart.css.map */
