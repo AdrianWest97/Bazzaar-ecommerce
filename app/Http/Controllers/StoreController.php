@@ -2,87 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Notifications\notification_list;
+use App\Product;
+use App\User;
 use Auth;
 use App\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class StoreController extends Controller
 {
 
     public function __construct(){
-        $this->middleware("auth")->except("show");
-    }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+        $this->middleware(["auth:store"])->except('show');
+        $this->middleware(["auth:web"]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view("store.create");
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-            $this->validate($request,[
-                'name' => ['required', 'string', 'max:50','unique:stores'],
-                'owner' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255'],
-                'description' => ['required', 'string', 'max:255'],
-                'country' => ['required', 'string', 'max:255'],
-                'street' => ['required', 'string', 'max:255'],
-                'parish' => ['required', 'string', 'max:255'],
-                ]);
-
-                $user = Auth::user();
-                if(!$user->supplier){
-                    $user->supplier = true;
-                    $user->save();
-                }
-
-                $user->stores = new Store;
-
-                $user->stores()->create([
-                    'name'=>$request->name,
-                    // 'type'=>$request->type,
-                    'description'=>$request->description,
-                    'owner'=>$request->owner,
-                    'email'=>$request->email,
-                ]);
-
-                $id = $user->stores->where('name',$request['name'])->first()->id;
-
-                $user->stores->find($id)->address()->create([
-                    'country'=>$request['country'],
-                    'street'=>$request['street'],
-                    'parish'=>$request['parish'],
-                ]);
-
-                $data = [
-                    'store'=>$user->stores->find($id)
-                ];
-
-                return view("store.dashboard")->with('data',$data);
-
-    }
 
     /**
      * Display the specified resource.
@@ -92,6 +29,7 @@ class StoreController extends Controller
      */
     public function show(Store $store)
     {
+        views($store)->record();
         return view("store.index",compact('store'));
     }
 
@@ -102,13 +40,11 @@ class StoreController extends Controller
      * @param  \App\Store  $store
      * @return \Illuminate\Http\Response
      */
-    public function inventory(Store $store)
+    public function inventory()
     {
-        $data = [
-            'store'=>$store
-        ];
-        return view("store.inventory",['data'=>$data]);
+        $store = Store::find(Auth::user()->stores->id);
 
+        return view("store.inventory",compact('store'));
     }
 
 
@@ -118,12 +54,15 @@ class StoreController extends Controller
      * @param  \App\Store  $store
      * @return \Illuminate\Http\Response
      */
-    public function show_admin(Store $store)
+    public function show_admin()
     {
-        $data = [
-            'store'=>$store
-        ];
-        return view("store.dashboard")->with('data',$data);
+        $store = Store::find(Auth::user()->stores->id);
+
+
+        
+
+
+        return view("store.dashboard",compact("store"));
     }
 
     /**
@@ -144,9 +83,40 @@ class StoreController extends Controller
      * @param  \App\Store  $store
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Store $store)
+    public function update(Request $request)
     {
-        //
+
+        $store = Store::find(Auth::user("store")->id);
+
+        $this->validate($request,[
+            'name' => ['required', 'string', 'max:50'],
+            'owner' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'numeric', 'min:10'],
+            // 'password' => ['required', 'password', 'min:8'],
+            'description' => ['required', 'string', 'max:255'],
+            'country' => ['required', 'string', 'max:255'],
+            'street' => ['required', 'string', 'max:255'],
+            'parish' => ['required', 'string', 'max:255'],
+            ]);
+
+            $store->update([
+                'name'=>$request->name,
+                // 'type'=>$request->type,
+                'description'=>$request->description,
+                'owner'=>$request->owner,
+                'email'=>$request->email,
+                'phone'=>$request->phone,
+                // 'password'=>Hash::make($request->password)
+            ]);
+
+            $store->address()->update([
+                'country'=>$request['country'],
+                'street'=>$request['street'],
+                'parish'=>$request['parish'],
+            ]);
+
+        return redirect()->route('store.admin-dashboard',compact('store'));
     }
 
     /**
@@ -159,4 +129,87 @@ class StoreController extends Controller
     {
         //
     }
+
+    public function analytics($period){
+
+        $store = Store::find(Auth::user()->stores->id);
+
+
+        return view("store.Analytics",compact('store'))->with('period',$period);
+    }
+
+    public function pastDateViewsChart($id,$period){
+
+        $store = Store::find($id);
+        return $store->pastDateViewsChart($period);
+    }
+
+
+
+
+    public function getNotifications(){
+        $store = Store::find(Auth::user()->stores->id);
+
+    //get each notification
+    $notification_list = array();
+    //all notifications
+    foreach($store->notifications->where("trash",false) as $notification){
+       
+                $product = Product::find(json_encode($notification->data["product"]));
+                $notifications =[
+                         'type'=>$notification->type,
+                         'id'=>$notification->id,
+                        'title'=>$product->title,
+                        'date'=>Carbon::parse($notification->created_at)->format("M d"),         
+                        'read_at'=>$notification->read_at ? Carbon::parse($notification->read_at)->format("M d, yy") : null           
+                     ];
+                  array_push($notification_list,$notifications);
+             }   
+      
+
+    $trash = array();
+    foreach($store->notifications->where("trash") as $notification){
+        $product = Product::find(json_encode($notification->data["product"]));
+        $item =[
+                 'type'=>$notification->type,
+                'id'=>$notification->id,
+                'title'=>$product->title,
+                'date'=>Carbon::parse($notification->created_at)->format("M d"),         
+                'read_at'=>$notification->read_at ? Carbon::parse($notification->read_at)->format("M d, yy") : null           
+             ];
+          array_push($trash,$item);
+    }   
+        
+
+    return view('store.notifications',compact('store','notification_list','trash'));
+        
+    }
+
+
+    public function getsettings(Store $store){
+        $store = Store::find(Auth::user()->stores->id);
+        return view("store.settings",compact('store'));
+    }
+
+
+    //get trash
+public function getTrash($storeid){
+    //find store
+    $store = Store::find($storeid);
+    $trash = array();
+    foreach($store->notifications->where("trash") as $notification){
+        $product = Product::find(json_encode($notification->data["product"]));
+        $item =[
+                 'type'=>$notification->type,
+                'id'=>$notification->id,
+                'title'=>$product->title,
+                'date'=>Carbon::parse($notification->created_at)->format("M d"),         
+                'read_at'=>$notification->read_at ? Carbon::parse($notification->read_at)->format("M d, yy") : null           
+             ];
+          array_push($trash,$item);
+         }   
+
+return response()->json($trash);
+}
+
 }

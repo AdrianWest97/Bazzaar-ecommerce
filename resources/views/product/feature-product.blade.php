@@ -35,151 +35,91 @@ $(document).ready(function(){
  </script>
 @endpush
 @section('content')
-<section id="section01" class="demo bg-white container">
-    <div class="row p-5 m-5 justify-content-center">
-        <p class="text-center">1 item(s) selected</p>
-        <div class="d-flex flex-row bd-highlight text-dark">
-            <div class="bd-highlight p-2">
-                <i class="fa fa-check fa-lg text-success" aria-hidden="true"></i>
-            </div>
-            <div class="bd-highlight p-2">
-                <img src={{$product->getImage('thumbnail')}} class="img-fluid img-thumbnail">
-            </div>
-            <div class="bd-highlight p-2">
-                <h1 class="h1">{{$product->title}}</h1>
-                <p>{{$product->description}}</p>
-                <p>$ {{$product->price}}</p>
-            </div>
-        </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-12 p-5">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <div class="d-flex flex-lg-row flex-column bd-highlight text-dark">
+                    <div class="bd-highlight p-2">
+                        <img src={{$product->getImage('medium')}} class="img-fluid rounded img-thumbnail">
+                    </div>
+                    <div class="bd-highlight p-2">
+                        <div class="d-flex flex-column bd-highlight text-dark">
+                        <p>{{$product->title}}</p>
+                        <p>{{$product->description}}</p>
+
+                    </div>
+                    </div>
+                   
+                </div>
+            </li>
         
-        <div class="col-3 text-right">
-                <a href="#section02" class="baz-button">Select feature type</a>
-            </div>
-            
-        </div>
-</section>
+        </ul>
 
-<section id="section02" class="demo">
-    <h1 class="text-center">Special offers</h1>
     
-    <div class="row  p-5 m-5 bg-transparent">
-        <div class="col-12 col-lg-3">
-            <div class="card shadow-lg">
-                <div class="card-header text-center border-0 bg-transparent">
-                    <h1>Basic</h1>
-                </div>
-                <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item border-0 h2">
-                        Free
-                    </li>
-                    <li class="list-group-item border-0">
-                        One product
-                    </li>
-                    <li class="list-group-item border-0">
-                        Display for 2 days
-                    </li>
-                </ul>
-                
-                </div>
-                <div class="card-footer">
-                    <div class="col-12">
-                        <form action="{{route('product.store.feature',['id'=>$product->id,'type'=>'basic'])}}" method="post">
-                            @csrf
-                        <input type="submit" value="Select"  class="btn btn-outline-secondary w-100 btn-lg"/>
-                        </form>
-                        
-                    </div>
-                </div>
-            </div>
         </div>
+    </div>
+</div>
 
 
+<section class="container-fluid">
+    <h1 class="text-center">Special offers</h1>
 
-        <div class="col-12 col-lg-3">
-            <div class="card shadow-lg">
-                <div class="card-header text-center border-0 bg-transparent">
-                    <h1><del>Standard</del></h1>
-                </div>
-                <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item border-0 h3">
-                        $2.99 USD/ $410.00 JMD
-                    </li>
-                    <li class="list-group-item border-0">
-                        Three (3) products
-                    </li>
-                    <li class="list-group-item border-0">
-                        Display for 7 days
-                    </li>
+    <div class="container">
+        <div class="card-deck mx-auto m-5 text-center ">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h3 class="my-0 font-weight-normal">Basic</h3>
+              </div>
+              <div class="card-body">
+                <h1 class="card-title pricing-card-title">$0</h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                  <li>1 product selection</li>
+                  <li>Only for 2 days</li>
+                  <li>Minimum analytics</li>
+                  <li>unlimited user views</li>
                 </ul>
-                
-                </div>
-                <div class="card-footer">
-                    <div class="col-12">
-                        <button class="btn btn-outline-primary w-100 btn-lg disabled">Select</button>
-                    </div>
-                </div>
+                <form method="POST" action="{{route('product.store.feature',['id'=>$product->id,'type'=>'basic'])}}">
+                    @csrf
+                    @method('POST')
+
+                <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Select for free</button>
+              </div>
             </div>
-
-        </div>
-
-
-        <div class="col-12 col-lg-3">
-            <div class="card shadow-lg">
-                <div class="card-header text-center border-0 bg-transparent">
-                    <h1><del>Business</del></h1>
-                </div>
-                <div class="card-body">
-                <ul class="list-group ">
-                    <li class="list-group-item border-0 h3">
-                        $10.99 USD/ $1,500 JMD
-                    </li>
-                    <li class="list-group-item border-0">
-                        Three (7) products
-                    </li>
-                    <li class="list-group-item border-0">
-                        Display for 30 days
-                    </li>
+            <div class="card mb-4 shadow-lg">
+              <div class="card-header bg-transparent border-0">
+                <h3 class="my-0 font-weight-normal">Stabdard</h3>
+                <small>Recommened</small>
+              </div>
+              <div class="card-body">
+                <h1 class="card-title pricing-card-title">$2.99<small class="text-muted">/ $410JMD</small></h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li>3 product selections</li>
+                    <li>Only for 7 days</li>
+                    <li>Maximum analytics</li>
+                    <li>unlimited user views</li>
                 </ul>
-                
-                </div>
-                <div class="card-footer">
-                    <div class="col-12">
-                        <button class="btn btn-outline-primary w-100 btn-lg disabled">Select</button>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-lg btn-block btn-primary">Buy now</button>
+              </div>
             </div>
-
-        </div>
-
-        <div class="col-12 col-lg-3">
-            <div class="card shadow-lg">
-                <div class="card-header text-center border-0 bg-transparent">
-                    <h1><del>Special</del></h1>
-                </div>
-                <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item border-0 h2">
-                        Custom budget
-                    </li>
-                    <li class="list-group-item border-0">
-                        Unlimited
-                    </li>
-                    <li class="list-group-item border-0">
-                        Unlimited
-                    </li>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h3 class="my-0 font-weight-normal">Business</h3>
+              </div>
+              <div class="card-body">
+                <h1 class="card-title pricing-card-title">$10.99<small class="text-muted">/ $1,500JMD</small></h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li>Up to 7 product display</li>
+                    <li>Only for 30 days</li>
+                    <li>Maximum analytics</li>
+                    <li>unlimited user views</li>
                 </ul>
-                
-                </div>
-                <div class="card-footer">
-                    <div class="col-12">
-                        <button class="btn btn-outline-success w-100 btn-lg disabled">Select</button>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-lg btn-block btn-primary">Buy now</button>
+              </div>
             </div>
+          </div>  
 
-        </div>
 
     </div>
 </section>
@@ -211,4 +151,7 @@ $(document).ready(function(){
     
 </section> --}}
 
+@endsection
+@section('footer')
+@include('layouts.footer')
 @endsection

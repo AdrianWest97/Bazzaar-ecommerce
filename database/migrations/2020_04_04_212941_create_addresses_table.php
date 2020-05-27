@@ -6,6 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAddressesTable extends Migration
 {
+
+    protected $fillable = [
+        'country',
+        'parish',
+        'street'
+    ];
     /**
      * Run the migrations.
      *
@@ -14,7 +20,7 @@ class CreateAddressesTable extends Migration
     public function up()
     {
         Schema::create('addresses', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->timestamps();
             $table->string("country")->default("jamaica");
             $table->string("parish");

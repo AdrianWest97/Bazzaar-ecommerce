@@ -1,4 +1,6 @@
 
+
+
 $(function(){
 
   var maxChars = 255;
@@ -55,91 +57,75 @@ button.addEventListener("click", function() {
 
 let interactionPreview = setInterval(() => {
   toggleMenu();
-}, 2000)
+}, 2000);
 
 
 });
 
 
-
-
-
-//form submit
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  PopupMenu.init();
-});
-
-/**
- * ポップアップメニュー
- * @constructor
- * @param {HTMLElement} elem ポップアップメニュー全体の親要素
- * @property {HTMLElement} opener 開くボタン
- * @property {HTMLElement} closer 閉じるボタン
- * @property {HTMLElement} menu メニュー要素
- */
-function PopupMenu(elem) {
-  this.opener = elem.querySelector('.js-popup-open');
-  this.closer = elem.querySelector('.js-popup-close');
-  this.menu = elem.querySelector('.js-popup-menu');
+//Open dropdown when clicking on element
+$(document).on('click', "a[data-dropdown='notificationMenu']",  function(e){
+  e.preventDefault();
   
-  this.handleOpen();
-  this.handleClose();
+  var el = $(e.currentTarget);
+  
+  $('body').prepend('<div id="dropdownOverlay" style="background: transparent; height:100%;width:100%;position:fixed;"></div>')
+  
+  var container = $(e.currentTarget).parent();
+  var dropdown = container.find('.dropdown');
+  var containerWidth = container.width();
+  var containerHeight = container.height();
+  
+  var anchorOffset = $(e.currentTarget).offset();
+
+  dropdown.css({
+    'right': containerWidth / 2 + 'px'
+  })
+  
+  container.toggleClass('expanded')
+  
+});
+
+//Close dropdowns on document click
+
+$(document).on('click', '#dropdownOverlay', function(e){
+  var el = $(e.currentTarget)[0].activeElement;
+  
+  if(typeof $(el).attr('data-dropdown') === 'undefined'){
+    $('#dropdownOverlay').remove();
+    $('.dropdown-container.expanded').removeClass('expanded');
+  }
+})
+
+//Dropdown collapsile tabs
+$('.notification-tab').click(function(e){
+  if($(e.currentTarget).parent().hasClass('expanded')){
+    $('.notification-group').removeClass('expanded');
+  }
+  else{
+    $('.notification-group').removeClass('expanded');
+    $(e.currentTarget).parent().toggleClass('expanded');
+  }
+})
+
+
+//add to cart function
+function addTocart(id){
+     $.get('/add-to-cart/'+id,function(resp){
+      var v = parseInt($("#cartcount").text()) || 0;
+      v++;
+      $("#cartcount").fadeIn("slow").text(v);
+      Toastify({
+        text: "Cart updated!",
+        duration: 3000, 
+        // destination: "https://github.com/apvarun/toastify-js",
+        newWindow: true,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: 'left', // `left`, `center` or `right`
+        backgroundColor: "rgb(142,199,61)",
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        onClick: function(){} // Callback after click
+      }).showToast();
+     });
 }
-
-/**
- * 開く動作をクリックイベントに登録
- */
-PopupMenu.prototype.handleOpen = function() {
-  this.opener.addEventListener('click', this.open.bind(this));
-};
-
-/**
- * 閉じる動作をクリックイベントに登録
- */
-PopupMenu.prototype.handleClose = function() {
-  this.closer.addEventListener('click', this.close.bind(this));
-};
-
-/**
- * 開く
- */
-PopupMenu.prototype.open = function() {
-  this.menu.classList.add('is-open');
-};
-
-/**
- * 閉じる
- */
-PopupMenu.prototype.close = function() {
-  // 閉じるアニメーション用を表現するためのクラス
-  this.menu.classList.add('is-closing');
-  
-  const that = this;
-
-  // 閉じるアニメーションが終わってからis-openクラスを消去する
-  // すぐis-openクラスを消去してしまうと、display: noneになり、
-  // 閉じるアニメーションを見せられないため
-  this.menu.addEventListener('animationend', function close() {
-    // リスナー実行直後にリスナーを削除する
-    // これをしないと、開くアニメーションの終了時にも
-    // このリスナーが実行されてしまう
-    that.menu.removeEventListener('animationend', close);
-    that.menu.classList.remove('is-open');
-    that.menu.classList.remove('is-closing');
-  });
-};
-
-PopupMenu.init = function() {
-  const popupMenus = document.querySelectorAll('.js-popup');
-  popupMenus.forEach(elem => {
-    new PopupMenu(elem);
-  });
-};
-
-//send mail
-

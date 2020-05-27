@@ -14,7 +14,7 @@ class CreateProductsTable extends Migration
     public function up()
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->timestamps();
             
 
@@ -27,6 +27,10 @@ class CreateProductsTable extends Migration
             $table->string("location");
             $table->boolean("available")->nullable();
             $table->double("price");
+            $table->string("currency");
+            $table->boolean("featured")->default(false);
+
+
 
 
             //farm

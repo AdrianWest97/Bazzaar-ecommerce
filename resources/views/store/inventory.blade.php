@@ -1,5 +1,102 @@
-@extends('layouts.store',['store'=>$data])
 
+@extends('layouts.store')
+@push("css")
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/r-2.2.3/datatables.min.css"/>
+<style>
+    table {
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+table caption {
+  font-size: 1.5em;
+  margin: .5em 0 .75em;
+}
+
+table tr {
+  border: 1px solid #ddd;
+  padding: .35em;
+}
+
+table th,
+table td {
+  padding: .625em;
+  /* text-align: center; */
+}
+
+table th {
+  font-size: .85em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width: 600px) {
+  table {
+    border: 0;
+  }
+
+  table caption {
+    font-size: 1.3em;
+  }
+  
+  table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  
+  table tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: .625em;
+  }
+  
+  table td {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    font-size: .8em;
+    text-align: right;
+  }
+  
+  table td::before {
+    /*
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+    */
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  table td:last-child {
+    border-bottom: 0;
+  }
+}
+    </style>
+@endpush
+@push("scripts")
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/r-2.2.3/datatables.min.js"></script>
+<script>
+    $(document).ready(function() {
+    $('.product-list').DataTable();
+});
+
+function showDeleteModal(id){
+    $('#exampleModal').modal('show');
+    var pid = $("#product_id").val(id);
+
+}
+</script>
+@endpush
 @section('store_content')
 <section id="tabs" class="project-tab">
     <div class="container-fluid">
@@ -9,14 +106,14 @@
                 <h3 style="font-weight:600">Products</h3>
 
             </div>
-            <div class="col-2 text-right">
-              <a  class="baz-button" href="{{route('product.create',['store'=>$data['store'],'product_type'=>'empty'])}}" role="button">Add product</a>
+            <div class="col-lg-2 text-right">
+              <a  class="btn btn-default theme-btn" href="{{route('product.create',['store'=>$store,'product_type'=>'empty'])}}" role="button">Add product <i data-feather="plus"></i></a>
             </div>
            
         </div>
     
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 col-12">
                 <nav>
                     <div class="nav nav-tabs nav-item" id="nav-tab" role="tablist">
                         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">All</a>
@@ -25,53 +122,78 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-                        <div id="tableProductList" class="card" style="padding:10px">
+                        <div id="tableProductList" class="card border bg-white p-lg-5">
 
-                            <table class="table table-hover table-borderless">
+                            <table class="table table-borderless table-hover product-list">
 
                                 <thead class="bg-transparent">
                         
                                     <tr>
                                         {{-- <th >Edit</th> --}}
-                                        <th >Image</th>
-                                        <th >Product</th>
-                                        <th >Type</th>
-                                        <th >Description</th>
-                                        <th>Cost</th>
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Type</th>
+                                        {{-- <th >Description</th> --}}
+                                        <th scope="col">Cost</th>
+                                        <th scope="col">Action</th>
 
                                     </tr>
                                 </thead>
                                 <tbody class="list">
-                                    @foreach ($data['store']->products as $product)
-                                    <tr class="border-bottom">
+                                    @foreach ($store->products()->orderby("created_at","desc")->get() as $product)
+                                    <tr>
                                         {{-- <td>
                                             <a href="{{route('product.edit',['id'=>$product])}}">Edit</a>
                                         </td> --}}
-                                        <td>
-                                            <img src={{$product->getImage("thumbnail_smaller")}} class="img-fluid" style="max-width:60px;vertical-align:top;box-sizing:border-box" alt="Sheep">
+                                        <td data-label="Image">
+                                            <img src={{$product->getImage("thumbnail")}} class="img-fluid" style="" alt="prodyct image">
+                                            @featured($product)
+                                            <span class="badge badge-success">Feature</span>
+                                            @endfeatured
                                         </td>
                                 
-                                        <td class="name" scope="row" class="w-auto">
+                                        <td data-label="Title">
 
                                             <span class="name"  style="vertical-align: middle; text-align:center">
-                                                <a href="{{route('product.view',['product'=>$product])}}">
+                                                <a href="{{route('product.view',['product'=>$product])}}" class="text-dark h6">
                                                  {{$product->title}}
                                                 </a>
                                             </span>
                                         </td>
 
-                                        <td class="w-auto" style="vertical-align: middle; text-align:center">
+                                        <td data-label="Product type">
                                             {{$product->type}}
                                         </td>
                                         
-                                        <td class="w-50"  style="vertical-align: middle;">
+                                        {{-- <td class="w-50"  style="vertical-align: middle;">
                                             {{$product->description}}
-                                        </td>
+                                        </td> --}}
 
                     
-                                        <td  style="vertical-align: middle; text-align:center">
-                                           $ {{$product->price}}
+                                        <td data-label="Price">
+                                           @convert($product->price){{$product->currency}}
                                         </td>
+
+                                        <td data-label="Action">
+
+                                          <div class="dropdown">
+                                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="triggerId" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                 Option
+                                                </button>
+                                            <div class="dropdown-menu" aria-labelledby="triggerId">
+                                              <a href="javascript:;" onclick="showDeleteModal({{$product->id}})" class="dropdown-item" aria-hidden="true"><i class="feather-16 feather-inline text-danger" data-feather="trash"></i> Delete product</a>
+                                              <a href="{{route('product.edit',['store'=>$store,'product'=>$product])}}" class="dropdown-item" aria-hidden="true"><i class="feather-16 feather-inline text-primary" data-feather="edit-2"></i> Edit product</a>
+                                              @featured($product)
+                                              <a href="{{route('remove.featured',['id'=>$product->id])}}" class="dropdown-item" aria-hidden="true"><i class="feather-16 feather-inline text-danger" data-feather="x"></i> Remove AD</a>
+                                              @else
+                                              <a href="{{route('product.feature',['id'=>$product->id])}}" class="dropdown-item" aria-hidden="true"><i class="feather-16 feather-inline" data-feather="gift"></i> Add to featured</a>
+                                              @endfeatured
+                                            </div>
+                                          </div>
+ 
+                                         </td>
+ 
 
                                     </tr> 
                                     @endforeach
@@ -94,46 +216,31 @@
     </div>
 </section>
 
-    @push('scripts')
-    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.1.1/list.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/list.pagination.js/0.1.1/list.pagination.min.js"></script>
 
-    <script>
-        var pagingRows = 12;
-
-        var paginationOptions = {
-            innerWindow: 1,
-            left: 0,
-            right: 0
-        };
-        var options = {
-            valueNames: ['name'],
-            page: pagingRows,
-            plugins: [ListPagination(paginationOptions)],
-        };
-
-        var tableProductList = new List('tableProductList', options);
-
-        $('.jTablePageNext').on('click', function () {
-            var list = $('.pagination').find('li');
-            $.each(list, function (position, element) {
-                if ($(element).is('.active')) {
-                    $(list[position + 1]).trigger('click');
-                }
-            })
-        })
-        $('.jTablePagePrev').on('click', function () {
-            var list = $('.pagination').find('li');
-
-            $.each(list, function (position, element) {
-                if ($(element).is('.active')) {
-                    $(list[position - 1]).trigger('click');
-                }
-            })
-        })
-
-
-
-    </script>
-    @endpush
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form action="{{route('product.destroy')}}" method="post">
+        @csrf
+        @method('delete')
+        <input type="hidden" name="product_id" id="product_id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this product?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+        </form>
+    </div>
+  </div>
+  
 @endsection

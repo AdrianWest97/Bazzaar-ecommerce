@@ -14,7 +14,7 @@ class CreateFeaturedProductsTable extends Migration
     public function up()
     {
         Schema::create('featured_products', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->timestamps();
             $table->string('type'); //basic, premium, standard, trial
             $table->integer('product_id');

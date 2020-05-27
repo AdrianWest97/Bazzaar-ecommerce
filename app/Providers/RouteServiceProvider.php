@@ -30,11 +30,29 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-
         parent::boot();
+        Route::bind('user', function ($value, $route) {
+            return $this->getModel(\App\User::class, $value);
+        });
+    
+        Route::bind('product', function ($value, $route) {
+            return $this->getModel(\App\Product::class, $value);
+        });
+
+        Route::bind('store', function ($value, $route) {
+            return $this->getModel(\App\Store::class, $value);
+        });
+
     }
 
+    private function getModel($model, $routeKey)
+{
+    $id = \Hashids::connection($model)->decode($routeKey)[0] ?? null;
+    $modelInstance = resolve($model);
+
+    return  $modelInstance->findOrFail($id);
+}
+    
     /**
      * Define the routes for the application.
      *
